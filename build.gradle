@@ -1,0 +1,56 @@
+plugins {
+    id 'java'
+}
+
+group 'org.example'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+configurations {
+    cucumberRuntime {
+        extendsFrom testImplementation
+    }
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+    // RestAssured
+    testImplementation group: 'io.rest-assured', name: 'rest-assured', version: '4.3.3'
+    implementation group: 'io.rest-assured', name: 'json-path', version: '4.3.3'
+    implementation group: 'io.rest-assured', name: 'json-schema-validator', version: '4.3.3'
+    implementation group: 'io.rest-assured', name: 'rest-assured-common', version: '4.3.3'
+    implementation group: 'io.rest-assured', name: 'rest-assured-all', version: '4.3.3'
+
+    // Json
+    implementation group: 'org.json', name: 'json', version: '20201115'
+
+
+    // Cucumber ----> BDD
+
+    testImplementation group: 'io.cucumber', name: 'cucumber-junit', version: '6.10.0'
+    implementation group: 'io.cucumber', name: 'cucumber-java', version: '6.10.0'
+
+    // Reporte Cucumber
+    implementation group: 'net.masterthought', name: 'cucumber-reporting', version: '5.5.2'
+
+
+}
+
+
+//  gradle clean ----------> limpiar la carpeta : build
+// gradle cucumber -------> ejecutar los test
+// gradle cucumber -Psuite=@item
+task cucumber() {
+    dependsOn assemble, testClasses
+    doLast {
+        javaexec {
+            main = "io.cucumber.core.cli.Main"
+            classpath = configurations.cucumberRuntime + sourceSets.main.output + sourceSets.test.output
+            //args = ['--plugin','html:build/reports/cucumber/report.html' , '--glue', 'runner', 'src/test/resources']
+            args = ['--plugin','json:build/reports/cucumber/report.json' , '--glue', 'runner', 'src/test/resources','--tags']+[suite]
+        }
+    }
+}
